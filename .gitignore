@@ -1,0 +1,8 @@
+.env*
+map-config.json
+dashboard-data.json
+telemetry/
+backups/
+__pycache__/
+*.log
+.venv/

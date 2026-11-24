@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#06101d">
+  <meta name="description" content="F99th Fighting 99th Fighter Wing — read-only operations dashboard">
+  <title>F99th | Live Operations v0.2.4-dev</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/terrain-outlines.js" defer></script>
+  <script src="/mgrs.js" defer></script>
+  <script src="/coordinates.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <header class="masthead">
+    <div class="identity">
+      <div class="brand-logo" aria-label="F99th squadron emblem">
+        <img src="/assets/f99th-patch.jpg" alt="Original F99th squadron patch">
+        <span class="logo-fallback">F<span>99</span>th</span>
+      </div>
+      <div class="masthead-titles">
+        <div class="overline">FIGHTING 99TH FIGHTER WING <span class="slash">/</span> SERVEROPS</div>
+        <h1>LIVE <em>OPERATIONS</em></h1>
+        <div class="subline">F99th3 <span>•</span> Dedicated DCS Server <span>•</span> Public read-only view</div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="link-health"><span class="light" id="connection-light"></span><span id="connection-state">Connecting to F99th3</span><small id="clock">--:--:--</small></div>
+      <div class="bot-logo" aria-label="F99th ServerOps bot graphic">
+        <img src="/assets/serverops-bot.png" alt="F99th ServerOps bot logo">
+        <span class="bot-fallback">SERVER<br>OPS</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="services" aria-label="Server health">
+    <div class="service"><span class="service-label">DCS WORLD <a id="dcs-latest" class="release-version" href="https://www.digitalcombatsimulator.com/en/news/changelog/" target="_blank" rel="noopener">Latest: checking…</a></span><div id="dcs-details" class="service-details">Checking both servers…</div></div>
+    <div class="service"><span class="service-label">SRS RADIO <a id="srs-latest" class="release-version" href="https://github.com/ciribob/DCS-SimpleRadioStandalone/releases/latest" target="_blank" rel="noopener">Latest: checking…</a></span><div id="srs-details" class="service-details">Checking both servers…</div></div>
+  </section>
+
+  <main class="operations-layout">
+    <section class="map-panel" aria-label="Large tactical map">
+      <div class="panel-top map-top">
+        <div><div class="eyebrow">TACTICAL OPERATIONS CENTER</div><h2>World Map</h2></div>
+        <div class="map-heading-right"><span class="map-data-label" id="map-data-label">Telemetry pending</span><span class="view-live"><span class="blink-dot"></span>READ ONLY</span></div>
+      </div>
+      <div class="layer-toolbar" aria-label="Map layers">
+        <span>Basemap</span><button type="button" data-basemap="tactical" aria-pressed="false" disabled title="CARTO configuration loading">Tactical Dark</button><button type="button" data-basemap="topo" aria-pressed="true">Topographic</button><button type="button" data-basemap="street" aria-pressed="false">Street</button><button type="button" data-basemap="dark" aria-pressed="false">Street · dark</button><span id="carto-status" class="terrain-legend"></span>
+        <span>Servers</span><button type="button" data-site="georgia" aria-pressed="true">Georgia</button><button type="button" data-site="pennsylvania" aria-pressed="true">Pennsylvania</button>
+        <span>Aircraft</span><button type="button" data-filter="blue" aria-pressed="true">Blue</button><button type="button" data-filter="red" aria-pressed="false">Red 🔒</button><button type="button" data-filter="neutral" aria-pressed="true">Neutral</button><button type="button" data-filter="players" aria-pressed="true">Players</button><button type="button" data-filter="ai" aria-pressed="true">AI</button><button type="button" id="aircraft-all">Show all</button><button type="button" id="aircraft-none">Hide all</button>
+        <span>Terrain</span><button type="button" id="terrain-toggle" aria-pressed="true">Terrain outlines</button><label for="terrain-select">Find terrain</label><select id="terrain-select"><option value="">Select terrain…</option></select><span class="terrain-legend">Dashed outlines: approximate terrain areas</span>
+        <span id="terrain-label-note" class="terrain-legend"></span><small id="aircraft-scope">Full mission aircraft feed pending</small>
+      </div>
+      <div id="map" class="map-viewport" role="region" tabindex="0" aria-label="Interactive world map. Arrow keys pan, plus and minus zoom, Home recenters. Drag to pan or scroll to zoom.">
+        <div class="geo-map" id="geo-map" aria-label="OpenTopoMap geographic basemap"></div>
+        <div class="map-grid" aria-hidden="true"></div>
+        <div id="tile-warning" class="tile-warning" hidden>The geographic map is loading…</div>
+        <button type="button" id="map-fallback" hidden>Use Street · dark instead</button><div class="map-planes" id="map-planes"></div>
+        <div class="map-overlay-head"><span class="overlay-kicker">LIVE TACTICAL DISPLAY</span><div class="cursor-row"><b>DDM</b><span id="map-coordinate">Move cursor over map</span></div><div class="cursor-row"><b>DMS</b><span id="map-dms">—</span></div><div class="cursor-row"><b>MGRS</b><span id="map-mgrs">—</span></div><span>CURSOR · WGS84</span></div>
+        <div class="map-overlay-bottom"><span class="map-signal" id="map-signal">Awaiting mission telemetry</span><span class="map-timing" id="map-updated">Feed not connected</span></div>
+        <div class="map-controls"><button type="button" id="zoom-in" aria-label="Zoom map in">+</button><button type="button" id="zoom-out" aria-label="Zoom map out">−</button><button type="button" id="map-home" aria-label="Recenter map">⌖</button></div>
+        <div class="osm-credit" id="map-credit"><a href="https://github.com/sletuffe/OpenTopoMap" target="_blank" rel="noopener">© OpenTopoMap-R</a> · <a href="https://openmaps.fr/donate" target="_blank" rel="noopener">Support tiles</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a></div>
+      </div>
+      <div class="map-footer"><span><b class="cyan">F99th3</b> / <span id="map-source-footer">Aircraft positions require a trusted feed.</span></span><span id="map-data-footer">Aircraft positions require a verified feed</span></div>
+    </section>
+
+    <aside class="intel-column">
+<section class="intel-panel"><div class="panel-top"><div><div class="eyebrow">GEORGIA OPERATION</div><h2>Mission Intelligence</h2></div><span class="feed-tag" id="georgia-feed">Awaiting feed</span></div><div class="mission-data"><div class="datum mission-field"><span>MISSION</span><strong id="georgia-mission">—</strong></div><div class="datum "><span>TERRAIN</span><strong id="georgia-terrain">—</strong></div><div class="datum "><span>MISSION STATE</span><strong id="georgia-state">—</strong></div><div class="datum "><span>MISSION TIME</span><strong id="georgia-clock">—</strong></div><div class="datum "><span>WEATHER</span><strong id="georgia-weather">—</strong></div><div class="datum "><span>ELAPSED</span><strong id="georgia-elapsed">—</strong></div><div class="datum "><span>CONNECTED PILOTS</span><strong id="georgia-count" class=large-count>—</strong></div></div><a class="brief-link" href="/briefings?server=georgia">Georgia mission briefing</a></section>
+<section class="intel-panel"><div class="panel-top"><div><div class="eyebrow">PENNSYLVANIA OPERATION</div><h2>Mission Intelligence</h2></div><span class="feed-tag" id="pennsylvania-feed">Awaiting feed</span></div><div class="mission-data"><div class="datum mission-field"><span>MISSION</span><strong id="pennsylvania-mission">—</strong></div><div class="datum "><span>TERRAIN</span><strong id="pennsylvania-terrain">—</strong></div><div class="datum "><span>MISSION STATE</span><strong id="pennsylvania-state">—</strong></div><div class="datum "><span>MISSION TIME</span><strong id="pennsylvania-clock">—</strong></div><div class="datum "><span>WEATHER</span><strong id="pennsylvania-weather">—</strong></div><div class="datum "><span>ELAPSED</span><strong id="pennsylvania-elapsed">—</strong></div><div class="datum "><span>CONNECTED PILOTS</span><strong id="pennsylvania-count" class=large-count>—</strong></div></div><a class="brief-link" href="/briefings?server=pennsylvania">Pennsylvania mission briefing</a></section>
+      <section class="intel-panel pilots-panel">
+        <div class="panel-top"><div><div class="eyebrow">FLIGHT OPERATIONS</div><h2>Connected Pilots</h2></div><span class="count-pill" id="roster-count">—</span></div>
+        <div id="roster" class="roster"><p class="empty-roster">Awaiting verified roster feed. Mission pilot count may still be available.</p></div>
+        <div class="roster-footer" id="roster-note">Read-only • No individual identities shown without a trusted feed</div>
+      </section>
+      <section class="tiny-note"><span class="note-light"></span><span>Mission data comes from the local DCS hook. The map never invents aircraft or positions.</span></section>
+    </aside>
+  </main>
+  <footer class="site-footer"><span>F99th <b>TACTICAL OPERATIONS NETWORK</b> <span class="sep">/</span> LIVE OPS v0.2.4-dev</span><span id="last-check">First update pending</span></footer>
+</div>
+<dialog id="red-dialog" aria-labelledby="red-title"><h2 id="red-title">Unlock red aircraft</h2><p>Enter the red coalition password.</p><label>Password <input id="red-password" type="password" autocomplete="off"></label><p id="red-error" role="alert"></p><button type="button" id="red-unlock">Unlock</button><button type="button" id="red-cancel">Cancel</button></dialog>
+</body>
+</html>
