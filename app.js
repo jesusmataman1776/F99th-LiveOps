@@ -416,8 +416,8 @@ function updateClock(){
 updateClock();syncClock();loadMapConfig();setInterval(syncClock,60000);setInterval(updateClock,1000);refresh();setInterval(refresh,5000);
 
 function renderServers(servers){
-  const dcs=byId('dcs-details'), srs=byId('srs-details');
-  dcs.replaceChildren();srs.replaceChildren();
+  const dcs=byId('dcs-details'), srs=byId('srs-details'), bot=byId('bot-details');
+  dcs.replaceChildren();srs.replaceChildren();bot.replaceChildren();
   for(const [site,label] of [['georgia','Georgia'],['pennsylvania','Pennsylvania']]){
     const data=servers[site]||{}, live=data.connected===true||data.status_live===true;
     const details=data.services||{}, conditions=data.conditions||{};
@@ -435,6 +435,10 @@ function renderServers(servers){
     const radio=document.createElement('div');radio.className='service-row';
     radio.textContent=`${label} · SRS ${details.srs_version||'version unavailable'} · ${details.srs_listening===true?'Listening':details.srs_listening===false?'Not listening':'Listening status unavailable'} · Port ${details.srs_port??'unavailable'} · ${details.srs_address||'Address unavailable'}`;
     srs.appendChild(radio);
+    const agent=document.createElement('div');agent.className='service-row';
+    const version=details.bot_version || 'Version unavailable';
+    agent.textContent=`${label} · ${version}`;
+    bot.appendChild(agent);
   }
 }
 
@@ -443,11 +447,11 @@ async function refreshReleaseVersions(){
     const response=await fetch('/api/releases',{cache:'no-store'});
     if(!response.ok)throw Error('Release check unavailable');
     const releases=await response.json();
-    for(const key of ['dcs','srs']){
+    for(const key of ['dcs','srs','bot']){
       const release=releases[key]||{};
       setText(key+'-latest',release.version?`Latest: ${release.version}${release.stale?' (last known)':''}`:'Latest: unavailable');
       byId(key+'-latest').title=release.checked_at?`Publisher release checked ${new Date(release.checked_at).toLocaleString()}${release.stale?'; refresh unavailable':''}`:'Publisher release check unavailable';
     }
-  }catch{for(const key of ['dcs','srs'])setText(key+'-latest','Latest: unavailable');}
+  }catch{for(const key of ['dcs','srs','bot'])setText(key+'-latest','Latest: unavailable');}
 }
 refreshReleaseVersions();setInterval(refreshReleaseVersions,60000);
