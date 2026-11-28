@@ -16,6 +16,8 @@ The F99th Live Ops dashboard displays DCS mission status, briefings, pilot posit
 - **Red coalition access.** Set `F99TH_RED_PASSWORD_SHA256` locally to the 64-character SHA-256 hex digest of the site password. Red access stays locked until configured.
 - **Map tiles.** The tactical basemap accepts a domain-restricted browser key through `F99TH_CARTO_BASEMAP_KEY`. The map serves this key to browsers. Use a key intended for browser access.
 
+- **DCSServerBot versions.** The server-health panels below the map show the latest published release and each node's reported version. Pennsylvania needs the updated `relay/server_details.py` and a relay restart to report its version. Set `F99TH_DCSSB_LOG` on either host if its active bot log is outside the default `C:\F99th\DCSServerBot` installation paths or uses a custom name.
+
 ## File register
 
 | Files | Function |

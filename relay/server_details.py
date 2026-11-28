@@ -1,5 +1,6 @@
 """Read-only metadata. Mission Lua is read as text, never executed or extracted."""
 import json
+import os
 import re
 import socket
 import subprocess
@@ -44,12 +45,40 @@ def mission_details(mission, roots):
     except OSError: return {}
 
 _services_cache = {}
+
+def running_bot_version():
+    override = os.environ.get('F99TH_DCSSB_LOG')
+    root = Path(r'C:\F99th\DCSServerBot')
+    filename = f'dcssb-{socket.gethostname().lower()}.log'
+    candidates = (Path(override),) if override else (
+        root / 'DCSServerBot' / 'logs' / filename,
+        root / 'logs' / filename,
+    )
+    for log in candidates:
+        try:
+            if time.time() - log.stat().st_mtime > 300:
+                continue
+        except OSError:
+            continue
+        # A long-running bot may have rotated its startup line out of the active log.
+        for path in (log, *(log.with_name(f'{log.name}.{n}') for n in range(1, 6))):
+            try:
+                with path.open(encoding='utf-8', errors='replace') as stream:
+                    header = stream.read(16_000)
+                match = re.search(r'\bDCSServerBot v(\d{1,3}(?:\.\d{1,6}){3}) starting up', header)
+                if match:
+                    return match[1]
+            except OSError:
+                continue
+    return None
+
 def services(saved_games):
     saved_games = Path(saved_games)
     key = str(saved_games)
     cached = _services_cache.get(key)
     if cached and time.monotonic()-cached[0] < 30: return dict(cached[1])
-    result = {'dcs_version': None, 'srs_version': None, 'srs_address': None, 'srs_port': None, 'srs_listening': None}
+    result = {'dcs_version': None, 'srs_version': None, 'srs_address': None, 'srs_port': None,
+              'srs_listening': None, 'bot_version': running_bot_version()}
     try:
         with (saved_games/'Logs/dcs.log').open(encoding='utf-8', errors='replace') as f:
             match = re.search(r'DCS/(\d+(?:\.\d+){2,4})', f.read(16000))

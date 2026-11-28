@@ -3,6 +3,7 @@ import os
 import copy
 import json
 import math
+import re
 import threading
 import time
 from datetime import datetime, timezone
@@ -52,6 +53,9 @@ def sanitize(raw, now=None):
     if recent(raw.get('details_updated'), now):
         services = raw.get('services') if isinstance(raw.get('services'),dict) else {}
         result['services'] = {k:text(services.get(k),120) for k in ('dcs_version','srs_version','srs_address')}
+        version = services.get('bot_version')
+        if isinstance(version, str) and re.fullmatch(r'\d{1,3}(?:\.\d{1,6}){3}', version):
+            result['services']['bot_version'] = version
         result['services']['srs_port'] = number(services.get('srs_port'),1,65535)
         result['services']['srs_listening'] = services.get('srs_listening') if type(services.get('srs_listening')) is bool else None
     if result['status_live']:

@@ -10,8 +10,13 @@ from urllib.request import Request, urlopen
 SOURCES = {
     'dcs': 'https://www.digitalcombatsimulator.com/en/news/changelog/',
     'srs': 'https://api.github.com/repos/ciribob/DCS-SimpleRadioStandalone/releases/latest',
+    'bot': 'https://api.github.com/repos/Special-K-s-Flightsim-Bots/DCSServerBot/releases/latest',
 }
-LINKS = {'dcs': SOURCES['dcs'], 'srs': 'https://github.com/ciribob/DCS-SimpleRadioStandalone/releases/latest'}
+LINKS = {
+    'dcs': SOURCES['dcs'],
+    'srs': 'https://github.com/ciribob/DCS-SimpleRadioStandalone/releases/latest',
+    'bot': 'https://github.com/Special-K-s-Flightsim-Bots/DCSServerBot/releases/latest',
+}
 _lock = threading.Lock()
 _state = {key: {'version': None, 'checked_at': None, 'stale': True, 'source': LINKS[key]} for key in SOURCES}
 
@@ -35,7 +40,7 @@ def snapshot():
 def refresh():
     for key, url in SOURCES.items():
         try:
-            request = Request(url, headers={'User-Agent': 'F99th-LiveOps/1.0', 'Accept': 'application/json' if key == 'srs' else 'text/html'})
+            request = Request(url, headers={'User-Agent': 'F99th-LiveOps/1.0', 'Accept': 'text/html' if key == 'dcs' else 'application/json'})
             with urlopen(request, timeout=12) as response:
                 body = response.read(2_000_001)
             if len(body) > 2_000_000:
